@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Page</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div id="my-div"></div>
+<button id="my-button">Click me!</button>
+
+<script>
+    $(document).ready(function() {
+        $('#my-button').click(function() {
+            $.ajax({
+                url: '/api',
+                success: function(data) {
+                    $('#my-div').text(data.message);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

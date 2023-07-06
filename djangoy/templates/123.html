@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>文件上传</title>
+    <style>
+        /* 整体布局 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* 标题样式 */
+        h1 {
+            font-size: 2em;
+            color: #333;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        /* 表单样式 */
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px 0 rgba(0,0,0,0.2);
+            width: 500px;
+        }
+
+        /* 文件选择和上传按钮布局 */
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 文件选择按钮样式 */
+        .file-input-btn {
+            display: inline-block;
+            background-color: #009688;
+            color: white;
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .file-input-btn:hover {
+            background-color: #00796b;
+        }
+
+        /* 隐藏原始文件输入 */
+        #fileInput {
+            display: none;
+        }
+
+        /* 上传按钮样式 */
+        button[type="submit"] {
+            display: inline-block;
+            background-color: #3f51b5;
+            color: white;
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #303f9f;
+        }
+
+        /* 文件名显示 */
+        .file-name {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .file-name:hover {
+            color: #009688;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <h1>上传文件</h1>
+    <form method="post" action="{% url 'uploadapi' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="button-row">
+            <label for="fileInput" class="file-input-btn">选择文件</label>
+            <input type="file" name="file" id="fileInput" required onchange="showFileName(event)">
+            <button type="submit">上传</button>
+        </div>
+        <p id="fileName" class="file-name"></p>
+    </form>
+</div>
+<script>
+    function showFileName(event) {
+        var input = event.target;
+        var fileName = input.files[0].name;
+        document.getElementById('fileName').textContent = fileName;
+    }
+
+    document.getElementById('fileName').onclick = function() {
+        var fileInput = document.getElementById('fileInput');
+        if (fileInput.files && fileInput.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+                var fileName = fileInput.files[0].name;
+                var fileExtension = fileName.split('.').pop().toLowerCase();
+
+                switch(fileExtension) {
+                    case 'jpg':
+                    case 'jpeg':
+                    case 'png':
+                        var img = document.createElement('img');
+                        img.src = e.target.result;
+                        document.body.appendChild(img);
+                        break;
+                    case 'pdf':
+                        // Use PDF.js to preview PDF
+                        break;
+                    case 'xlsx':
+                        // Use SheetJS (xlsx) to handle Excel
+                        break;
+                    case 'csv':
+                        // Use PapaParse to parse CSV
+                        break;
+                    case 'doc':
+                    case 'docx':
+                        // Use mammoth.js or msoffice-js to preview Word
+                        break;
+                    case 'ppt':
+                    case 'pptx':
+                        // PPT files might need a server-side library (like libreoffice) to convert before previewing in the client.
+                        break;
+                }
+            };
+
+            reader.readAsDataURL(fileInput.files[0]);
+
+        }
+    };
+</script>
+</body>
+</html>
+

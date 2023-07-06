@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>首页</title>
+  <style>
+    /* 导航栏样式 */
+    .navbar {
+      background-color: #f8f9fa;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 10px 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 9999;
+    }
+
+    .navbar ul {
+      list-style: none;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 0;
+      margin: 0;
+    }
+
+    .navbar li {
+      margin-right: 20px;
+    }
+
+    .navbar a {
+      text-decoration: none;
+      color: #000;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+
+    .navbar a.active {
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    /* 页面内容样式 */
+    body {
+      margin-top: 60px;
+      padding: 20px;
+    }
+
+    /* 示例内容样式 */
+    .page-content {
+      padding: 20px;
+      background-color: #f8f9fa;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .navbar .logout-link {
+      margin-left: auto;
+      padding: 5px 10px;
+      background-color: #ff0000;
+      color: #fff;
+      text-decoration: none;
+    }
+    .logout-link {
+      margin-left: auto;
+    }
+
+  </style>
+</head>
+<body>
+<div class="navbar">
+  <ul>
+    <li><a href="#" class="nav-link active" data-target="home">首页</a></li>
+    <li><a href="#" class="nav-link" data-target="link1">AI导航</a></li>
+    <li><a href="#" class="nav-link" data-target="link2">上传文件</a></li>
+    <li><a href="#" class="nav-link" data-target="link3">文件目录</a></li>
+<!--    <li><a href="#" class="nav-link" data-target="link4">链接4</a></li>-->
+<!--    <li><a href="#" class="nav-link" data-target="link5">链接5</a></li>-->
+    <li><a href="/logout/" class="logout-link">登出</a></li>
+  </ul>
+
+</div>
+
+<div class="page-content" id="page-content-home">
+  <h1>这是首页的模拟界面</h1>
+  <h1>你好, {{ request.session.username }}, 这是首页的模拟界面</h1>
+</div>
+<div class="page-content" id="page-content-link1" style="display: none;">
+  {% include 'index/AIIndex.html' %}
+</div>
+
+
+<div class="page-content" id="page-content-link2" style="display: none;">
+  {% include 'chatupload.html' %}
+</div>
+
+<div class="page-content" id="page-content-link3" style="display: none;">
+  <!-- 链接3页面内容 -->c
+</div>
+<div class="page-content" id="page-content-link4" style="display: none;">
+  <!-- 链接4页面内容 -->d
+</div>
+<div class="page-content" id="page-content-link5" style="display: none;">
+  <!-- 链接5页面内容 -->e
+</div>
+
+<script>
+  // 获取导航链接和页面内容的元素
+  const navLinks = document.querySelectorAll('.nav-link');
+  const pageContents = document.querySelectorAll('.page-content');
+
+  // 给每个导航链接添加点击事件处理程序
+  navLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+
+      // 移除所有导航链接的active类
+      navLinks.forEach(link => link.classList.remove('active'));
+
+      // 隐藏所有页面内容
+      pageContents.forEach(content => content.style.display = 'none');
+
+      // 将点击的导航链接设置为active类
+      this.classList.add('active');
+
+      // 获取目标页面的ID
+      const target = this.getAttribute('data-target');
+
+      // 显示目标页面内容
+      const targetContent = document.getElementById(`page-content-${target}`);
+      targetContent.style.display = 'block';
+    });
+  });
+</script>
+</body>
+</html>

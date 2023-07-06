@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>房屋估价表单</title>
+    <style>
+        /* 设置表单样式 */
+        form {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #FFF;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px #CCC;
+            padding: 20px;
+        }
+        label {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input[type="text"], input[type="number"] {
+            width: 300px;
+            margin-top: 5px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #CCC;
+            font-size: 16px;
+        }
+        input[type="submit"] {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        input[type="submit"]:hover {
+            background-color: #3e8e41;
+        }
+        /* 设置地图样式 */
+        #map {
+            height: 400px;
+            width: 1200px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px #CCC;
+        }
+        h1 {
+            font-size: 36px;
+            text-align: center;
+            margin-top: 50px;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+    <title>房屋估价表单</title>
+    <style>
+        /* 设置表单样式 */
+        form {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        label {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input[type="text"], input[type="number"] {
+            width: 300px;
+            margin-top: 5px;
+            padding: 5px;
+        }
+        input[type="submit"] {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #3e8e41;
+        }
+        /* 设置地图样式 */
+        #map {
+            height: 400px;
+            width: 600px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>房租预测系统</h1>
+    <form>
+		<div style="display:inline-block;">
+		  <label for="address">具体地址（包含市名）：</label>
+		  <input type="text" id="address" name="address" required>
+		  <button id="refreshBtn" type="button" onclick="updateMapLocation()">刷新</button>
+		</div>
+        <label>
+            房屋面积：
+            <input type="number" id="area" name="area" required>
+        </label>
+        <input type="submit" value="提交">
+		
+    </form>
+    <div id="map" style="width: 100%; height: 400px; margin: 0 auto;"></div>
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode:'ff70ddc278784ae7714a108ccf172e1a',
+        }
+	</script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=40e992bd6af5ba28972380df16bf08e0&callback=initMap"></script>
+	<script>
+  // 初始化地图
+  function initMap() {
+    var map = new AMap.Map('map', {
+      zoom: 15
+    });
+	var geocoder;
+	AMap.plugin(["AMap.Geocoder"],function(){
+	  geocoder = new AMap.Geocoder({
+		city: '全国'
+	  })
+	});
+    
+    // 在地图上添加一个标记
+    var marker = new AMap.Marker({
+      map: map,
+      position: [116.397428, 39.90923]
+    });
+    // 监听地图点击事件
+    map.on('click', function(e) {
+      var location = e.lnglat;
+      marker.setPosition(location);
+      // 调用逆地理编码服务获取经纬度对应的地址
+      geocoder.getAddress(location, function(status, result) {
+        if (status === 'complete' && result.regeocode) {
+          var address = result.regeocode.formattedAddress;
+          document.getElementById('address').value = address;
+        } else {
+          alert('地址解析失败');
+        }
+      });
+    });
+    // 监听提交按钮点击事件
+      $(document).ready(function() {
+          $('input[type="submit"]').click(function(e) {
+              e.preventDefault(); // 阻止表单默认提交行为
+              var address = document.getElementById('address').value;
+              var area = document.getElementById('area').value;
+              var location;
+              var lat;
+              var lon;
+              geocoder.getLocation(address, function(status, result) {
+                  if (status === 'complete' && result.geocodes.length > 0) {
+                      location = result.geocodes[0].location;
+                      lat = location.Q;
+                      lon = location.R;
+                      $.ajax({
+                          url: '/api',
+                          data: { lat: lat, lon: lon, area: area },
+                          success: function(data) {
+                              var price = data.message;
+                              price = price * (1 + Math.floor((area - 30) / 10) * 0.22);
+                              
+                              var infoWindow = new AMap.InfoWindow({
+                                  content: '<div><strong>估价结果：</strong>' + price + ' 元/月</div>',
+                                  offset: new AMap.Pixel(0, -20),
+                                  position: marker.getPosition()
+                              });
+                              infoWindow.open(map, marker.getPosition());
+                          }
+                      });
+                  } else {
+                      alert('地址解析失败');
+                  }
+              });
+          });
+      });
+
+
+
+      // 获取刷新按钮元素
+	var refreshBtn = document.getElementById('refreshBtn');
+
+	// 绑定按钮点击事件
+	refreshBtn.addEventListener('click', function() {
+		var address = document.getElementById('address').value;
+	  // 调用地理编码服务获取地址对应的经纬度
+	  geocoder.getLocation(address, function(status, result) {
+		if (status === 'complete' && result.geocodes.length > 0) {
+		  var location = result.geocodes[0].location;
+		  marker.setPosition(location);
+		  map.setCenter(location);
+		} else {
+		  alert('地址解析失败');
+		}
+	  });
+	});
+  }
+  // 计算房屋估价结果
+  function calculatePrice(area) {
+    // 这里只是一个示例，实际计算规则需要根据具体需求而定
+    var basePrice = 10000; // 单价：10000 元/月
+    return (area * basePrice / 10000).toFixed(2);
+  }
+ 
+
+</script>
+</body>
+</html>
